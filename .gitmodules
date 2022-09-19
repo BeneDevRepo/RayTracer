@@ -1,0 +1,3 @@
+[submodule "src/BWindow"]
+	path = src/BWindow
+	url = https://github.com/benedevrepo/BWindow
