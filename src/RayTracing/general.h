@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include "RayTracing/vec.h"
 #include "RayTracing/color.h"
 #include "RayTracing/Ray.h"
@@ -14,8 +16,8 @@ vec3 sampleSphericalMap(vec3 v) { // Equirectangular map
 	v = normalize(v);
 
     vec3 uv; // z output unused
-	uv.x() = .5 + atan2(v.z(), v.x()) / (2 * M_PI);
-	uv.y() = .5 + asin(v.y()) / M_PI;
+	uv.x() = .5 + atan2(v.z(), v.x()) / (2 * 3.1415926535);
+	uv.y() = .5 + asin(v.y()) / 3.1415926535;
 
     return uv;
 }

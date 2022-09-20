@@ -31,26 +31,26 @@ inline double random_double(double min, double max) {
 // template<size_t DIM>
 class vec3 {
 public:
-	double e[3];
+	float e[3];
 
 public:
 	vec3() : e{0, 0, 0} {}
-	explicit vec3(const double t) : e{t, t, t} {}
-	vec3(const double e0, const double e1, const double e2) : e{e0, e1, e2} {}
+	explicit vec3(const float t) : e{t, t, t} {}
+	vec3(const float e0, const float e1, const float e2) : e{e0, e1, e2} {}
 
-	inline double x() const { return e[0]; }
-	inline double y() const { return e[1]; }
-	inline double z() const { return e[2]; }
+	inline float x() const { return e[0]; }
+	inline float y() const { return e[1]; }
+	inline float z() const { return e[2]; }
 
-	inline double& x() { return e[0]; }
-	inline double& y() { return e[1]; }
-	inline double& z() { return e[2]; }
+	inline float& x() { return e[0]; }
+	inline float& y() { return e[1]; }
+	inline float& z() { return e[2]; }
 
 	inline vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
-	inline double operator[](const size_t i) const { return e[i]; }
-	inline double& operator[](const size_t i) { return e[i]; }
+	inline float operator[](const size_t i) const { return e[i]; }
+	inline float& operator[](const size_t i) { return e[i]; }
 
-	inline vec3& operator+=(const double &t) {
+	inline vec3& operator+=(const float &t) {
 		e[0] += t;
 		e[1] += t;
 		e[2] += t;
@@ -64,7 +64,7 @@ public:
 		return *this;
 	}
 
-	inline vec3& operator-=(const double &t) {
+	inline vec3& operator-=(const float &t) {
 		e[0] -= t;
 		e[1] -= t;
 		e[2] -= t;
@@ -78,7 +78,7 @@ public:
 		return *this;
 	}
 
-	inline vec3& operator*=(const double t) {
+	inline vec3& operator*=(const float t) {
 		e[0] *= t;
 		e[1] *= t;
 		e[2] *= t;
@@ -92,7 +92,7 @@ public:
 		return *this;
 	}
 
-	inline vec3& operator/=(const double t) {
+	inline vec3& operator/=(const float t) {
 		return *this *= 1./t;
 	}
 
@@ -103,12 +103,16 @@ public:
 		return *this;
 	}
 
-	inline double length() const {
+	inline float length() const {
 		return std::sqrt(length_squared());
 	}
 
-	inline double length_squared() const {
+	inline float length_squared() const {
 		return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
+	}
+
+	static inline vec3 random() {
+		return vec3(random_double(), random_double(), random_double());
 	}
 };
 
@@ -135,19 +139,19 @@ inline vec3 operator*(const vec3 &u, const vec3 &v) {
     return vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
 }
 
-inline vec3 operator*(const double t, const vec3 &v) {
+inline vec3 operator*(const float t, const vec3 &v) {
     return vec3(t*v.e[0], t*v.e[1], t*v.e[2]);
 }
 
-inline vec3 operator*(const vec3 &v, const double t) {
+inline vec3 operator*(const vec3 &v, const float t) {
     return t * v;
 }
 
-inline vec3 operator/(const vec3 &v, const double t) {
+inline vec3 operator/(const vec3 &v, const float t) {
     return (1/t) * v;
 }
 
-inline double dot(const vec3 &u, const vec3 &v) {
+inline float dot(const vec3 &u, const vec3 &v) {
     return u.e[0] * v.e[0]
          + u.e[1] * v.e[1]
          + u.e[2] * v.e[2];
@@ -166,12 +170,13 @@ inline vec3 unit_vector(const vec3 &v) {
     return normalize(v);
 }
 
-inline double length_squared(const vec3 &vec) {
+inline float length_squared(const vec3 &vec) {
 	return dot(vec, vec);
 }
 
 inline bool near_zero(const vec3& v) {
-	constexpr double s = 1e-8;
+	// constexpr float s = 1e-8;
+	constexpr float s = 1e-6;
 	return fabs(v.x()) < s && fabs(v.x()) < s && fabs(v.x()) < s;
 }
 
@@ -179,17 +184,13 @@ inline vec3 reflect(const vec3& v, const vec3& n) {
 	return v - (n * (2. * dot(v, n)));
 }
 
-inline vec3 lerp(const vec3& a, const vec3& b, const double t) {
+inline vec3 lerp(const vec3& a, const vec3& b, const float t) {
 	return (1-t) * a + t * b;
 }
 
 // Random
 
-inline vec3 random() {
-	return vec3(random_double(), random_double(), random_double());
-}
-
-inline vec3 random(const double min, const double max) {
+inline vec3 random(const float min, const float max) {
 	return vec3(random_double(min,max), random_double(min,max), random_double(min,max));
 }
 

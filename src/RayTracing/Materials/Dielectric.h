@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include "RayTracing/vec.h"
 #include "RayTracing/Ray.h"
 #include "RayTracing/hit_record.h"
@@ -18,7 +20,7 @@ public:
 		double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
 		vec3 unit_direction = unit_vector(r_in.dir);
-		double cos_theta = std::min(dot(-unit_direction, rec.normal), 1.0);
+		double cos_theta = std::min<double>(dot(-unit_direction, rec.normal), 1.0);
 		double sin_theta = std::sqrt(1.0 - cos_theta*cos_theta);
 
 		bool cannot_refract = refraction_ratio * sin_theta > 1.0;
@@ -38,7 +40,7 @@ public:
 	}
 
 	static vec3 refract(const vec3& uv, const vec3& n, const double etai_over_etat) {
-		double cos_theta = std::min(dot(-uv, n), 1.0);
+		double cos_theta = std::min<double>(dot(-uv, n), 1.0);
 		vec3 r_out_perp =  ((n * cos_theta) + uv) * etai_over_etat;
 		vec3 r_out_parallel = n * (-std::sqrt(std::abs(1.0 - length_squared(r_out_perp))));
 		return r_out_perp + r_out_parallel;

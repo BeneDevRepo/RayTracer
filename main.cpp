@@ -7,12 +7,12 @@
 
 // #include "FileUtils/FileUtils.h"
 
-#include "Threading/mingw.thread.h"
-#include "Threading/mingw.mutex.h"
-// #include <thread>
-// #include <mutex>
+// #include "Threading/mingw.thread.h"
+// #include "Threading/mingw.mutex.h"
+#include <thread>
+#include <mutex>
 
-#include "Window/GDIWindow.h"
+#include "BWindow/GDIWindow.h"
 // #include "Window/GDIWindowCustom.h"
 
 #include "RayTracing/general.h"
@@ -37,19 +37,7 @@
 
 #include "RayTracing/exampleScenes.h"
 
-
-// - OpenGL Raytracer
-// - Audio (z.B. Console keyboard)
-
-
-
-
-// #include "oglTest.h"
-
-// int main1() {
-//     test1();
-// 	return 0;
-// }
+#include "stb/stb_image.h"
 
 
 
@@ -137,9 +125,19 @@ void renderThread(volatile bool* stopThread, volatile Camera *camRef, const hitt
 	}
 }
 
-#include "stb/stb_image.h"
+int main2(int argc, char** argv);
 
 int main(int argc, char** argv) {
+	system("pwd");
+	try {
+		return main2(argc, argv);
+	} catch(const std::exception& ex) {
+		std::cout << "Unhandled Exception: " << ex.what() << "\n";
+	}
+}
+
+int main2(int argc, char** argv) {
+	std::cout << "Program started\n";
 	fTexture skybox;
 
 	{
@@ -147,7 +145,7 @@ int main(int argc, char** argv) {
 		int width, height;
 		stbi_set_flip_vertically_on_load(false); // dont flip loaded textures on the y-axis.
 
-		uint8_t *const data = stbi_load("../res/Desert_Highway/Road_to_MonumentValley_8k.jpg", &width, &height, &nChannelsSkybox, 0);
+		uint8_t *const data = stbi_load("res/Desert_Highway/Road_to_MonumentValley_8k.jpg", &width, &height, &nChannelsSkybox, 0);
 		// uint8_t *const data = stbi_load("../res/Desert_Highway/Road_to_MonumentValley_Ref.hdr", &width, &height, &nChannelsSkybox, 0);
 		// uint8_t *const data = stbi_load("../res/OutdoorHDRI024_4K-HDR.exr", &width, &height, &nChannelsSkybox, 0);
 		// uint8_t *const data = stbi_load("../res/full-seamless-spherical-hdri-panorama-degrees-angle-view-wooden-pier-near-lake-evening-equirectangular-projection-159712935.jpg", &width, &height, &nChannelsSkybox, 0);
@@ -157,7 +155,9 @@ int main(int argc, char** argv) {
 
 		// std::cout << "channels: " << nChannelsSkybox << "\n";
 
+		std::cout << "Loading Skybox\n";
 		skybox = fTexture(width, height);
+		std::cout << "Loaded Skybox\n";
 
 		for(size_t y = 0; y < height; y++)
 			for(size_t x = 0; x < width; x++)
@@ -203,57 +203,58 @@ int main(int argc, char** argv) {
 	// std::shared_ptr<Material> material5 = std::make_shared<Metal>(color(1., .75, .75), .0);
 	// std::shared_ptr<Dielectric> material5 = std::make_shared<Dielectric>(1.5);
 	{
-		FILE *const fp = fopen("../res/Bunny.stl", "rb");
+		FILE *const fp = fopen("res/Bunny.stl", "rb");
 
 		if(fp == nullptr)
-			printf("Error reading STL File.\n");
+			throw std::runtime_error("Error reading STL File.");
 
 		uint8_t header[80];
 		fread(header, 1, 80, fp);
-	
+
 		uint32_t numTris;
 		fread(&numTris, 4, 1, fp);
 		printf("Number of Triangles: %d\n", numTris);
 
-		// #pragma pack
-		struct __attribute__ ((packed)) _Triangle {
-			struct {
-				float x, y, z;
-			} normal, verticies[3];
-			// vec3 normal;
-			// vec3 verticies[3];
+		struct StlTriangle {
+			vec3 normal;
+			vec3 vertices[3];
 
 			uint16_t attrCount;
-		} *triangles;
-		triangles = new _Triangle[numTris];
+		};
 
-		fread(triangles, sizeof(_Triangle), numTris, fp);
+		StlTriangle *triangles = new StlTriangle[numTris];
 
-		for(int i = 0; i < numTris; i++) {
-			for(int j = 0; j < 3; j++) {
-				std::swap(triangles[i].verticies[j].y, triangles[i].verticies[j].z);
-				triangles[i].verticies[j].y *= -1;
+		// read triangles:
+		for(size_t i = 0; i < numTris; i++) {
+			fread(&triangles[i].normal.x(), sizeof(float), 1, fp);
+			fread(&triangles[i].normal.y(), sizeof(float), 1, fp);
+			fread(&triangles[i].normal.z(), sizeof(float), 1, fp);
+
+			for(size_t vert = 0; vert < 3; vert++) {
+				fread(&triangles[i].vertices[vert].x(), sizeof(float), 1, fp);
+				fread(&triangles[i].vertices[vert].y(), sizeof(float), 1, fp);
+				fread(&triangles[i].vertices[vert].z(), sizeof(float), 1, fp);
 			}
-			// fread(&(triangles[i].normal), sizeof(float)*3, 1, fp);
-			// fread(triangles[i].verticies, sizeof(float)*3, 3, fp);
-			// fread(&(triangles[i].attrCount), sizeof(uint16_t), 1, fp);
+
+			fread(&triangles[i].attrCount, sizeof(uint16_t), 1, fp);
 		}
 
 		fclose(fp);
 
-		// for(int i = 0; i < numTris; i++) {
-		// 	// printf("attrCount: %d\n", triangles[i].attrCount);
-		// 	printf("x: %f\n", triangles[i].verticies[0].x);
-		// 	printf("y: %f\n", triangles[i].verticies[0].y);
-		// 	printf("z: %f\n", triangles[i].verticies[0].z);
-		// }
+		// correct coordinates:
+		for(int i = 0; i < numTris; i++) {
+			for(int j = 0; j < 3; j++) {
+				std::swap(triangles[i].vertices[j].y(), triangles[i].vertices[j].z());
+				triangles[i].vertices[j].y() *= -1;
+			}
+		}
 
 		std::vector<Triangle> mesh;
 
 		for(int i = 0; i < numTris; i++) {
-			vec3 v0{ triangles[i].verticies[0].x, triangles[i].verticies[0].y, triangles[i].verticies[0].z };
-			vec3 v1{ triangles[i].verticies[1].x, triangles[i].verticies[1].y, triangles[i].verticies[1].z };
-			vec3 v2{ triangles[i].verticies[2].x, triangles[i].verticies[2].y, triangles[i].verticies[2].z };
+			vec3 v0{ triangles[i].vertices[0].x(), triangles[i].vertices[0].y(), triangles[i].vertices[0].z() };
+			vec3 v1{ triangles[i].vertices[1].x(), triangles[i].vertices[1].y(), triangles[i].vertices[1].z() };
+			vec3 v2{ triangles[i].vertices[2].x(), triangles[i].vertices[2].y(), triangles[i].vertices[2].z() };
 			// world.add(std::make_shared<Triangle>(v0 * .01, v1 * .01, v2 * .01, material4));
 			mesh.push_back(Triangle(v0 * .01, v1 * .01, v2 * .01, material5));
 		}
@@ -269,10 +270,10 @@ int main(int argc, char** argv) {
 	Camera cam(camPos, camDir, vec3(0, 1, 0), camFOV, 1, aperture, focusDist);
 
 	static constexpr uint16_t NUM_THREADS = 6;
-	std::thread* renderThreads[NUM_THREADS];
+	std::thread *renderThreads[NUM_THREADS];
 	volatile bool idleThreads[NUM_THREADS];
 	for(uint16_t t = 0; t < NUM_THREADS; t++)
-		renderThreads[t] = new std::thread(renderThread, &stopThreads, &cam, std::ref(world), std::ref(skybox), idleThreads + t);
+		renderThreads[t] = new std::thread(renderThread, &stopThreads, &cam, std::cref(world), std::cref(skybox), idleThreads + t);
 
 	GDIWindow win(800, 800);
 	// GDIWindowCustom win(800, 800);

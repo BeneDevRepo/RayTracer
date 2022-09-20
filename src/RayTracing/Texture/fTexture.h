@@ -7,7 +7,8 @@ public:
 	uint32_t *pixels;
 	int width, height;
 
-	fTexture(const uint32_t width=0, const uint32_t height=0);
+	fTexture();
+	fTexture(const uint32_t width, const uint32_t height);
 	fTexture(fTexture&& other);
 	fTexture& operator=(fTexture&& other);
 	~fTexture();
