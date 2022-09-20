@@ -128,7 +128,9 @@ void renderThread(volatile bool* stopThread, volatile Camera *camRef, const hitt
 int main2(int argc, char** argv);
 
 int main(int argc, char** argv) {
+	std::cout << "Current Working directory: ";
 	system("pwd");
+
 	try {
 		return main2(argc, argv);
 	} catch(const std::exception& ex) {
@@ -145,7 +147,7 @@ int main2(int argc, char** argv) {
 		int width, height;
 		stbi_set_flip_vertically_on_load(false); // dont flip loaded textures on the y-axis.
 
-		uint8_t *const data = stbi_load("res/Desert_Highway/Road_to_MonumentValley_8k.jpg", &width, &height, &nChannelsSkybox, 0);
+		uint8_t *const data = stbi_load("../res/Desert_Highway/Road_to_MonumentValley_8k.jpg", &width, &height, &nChannelsSkybox, 0);
 		// uint8_t *const data = stbi_load("../res/Desert_Highway/Road_to_MonumentValley_Ref.hdr", &width, &height, &nChannelsSkybox, 0);
 		// uint8_t *const data = stbi_load("../res/OutdoorHDRI024_4K-HDR.exr", &width, &height, &nChannelsSkybox, 0);
 		// uint8_t *const data = stbi_load("../res/full-seamless-spherical-hdri-panorama-degrees-angle-view-wooden-pier-near-lake-evening-equirectangular-projection-159712935.jpg", &width, &height, &nChannelsSkybox, 0);
@@ -203,7 +205,7 @@ int main2(int argc, char** argv) {
 	// std::shared_ptr<Material> material5 = std::make_shared<Metal>(color(1., .75, .75), .0);
 	// std::shared_ptr<Dielectric> material5 = std::make_shared<Dielectric>(1.5);
 	{
-		FILE *const fp = fopen("res/Bunny.stl", "rb");
+		FILE *const fp = fopen("../res/Bunny.stl", "rb");
 
 		if(fp == nullptr)
 			throw std::runtime_error("Error reading STL File.");
