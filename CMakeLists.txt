@@ -18,11 +18,6 @@ target_link_libraries(Client "ws2_32.lib")
 target_link_libraries(Client "winmm.lib")
 # target_link_libraries(Client "libopengl32.lib")
 
-# file(GLOB_RECURSE SOURCES_CONSOLE "src/MultiConsole/*.cpp") # c++ files for ConsoleProcess
-# add_executable(ConsoleProcess console_process_main.cpp ${SOURCES_CONSOLE})
-# target_include_directories(ConsoleProcess PUBLIC "src")
-# add_dependencies(Client ConsoleProcess)
-
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
